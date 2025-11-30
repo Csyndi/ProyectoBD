@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cakery_shop_ui/screen/home_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+// Importamos la pantalla de destino
 
 class NavbarWidget extends StatelessWidget {
   const NavbarWidget({Key? key}) : super(key: key);
+
+  // Función para manejar la navegación a la pantalla de inicio
+  void _navigateToHome(BuildContext context) {
+    // Usamos Navigator.push para agregar la nueva pantalla (HomeScreen) a la pila.
+    // Esto te permite volver a la pantalla anterior con el botón 'atrás'.
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +41,16 @@ class NavbarWidget extends StatelessWidget {
               width: MediaQuery.of(context).size.width / 2 - 40.0.w,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
-                  Icon(
-                    Icons.home,
-                    color: Color(0xFFEF7532),
+                children: [
+                  // --- ELEMENTO CLAVE: Usamos GestureDetector o InkWell para el ícono de la casa ---
+                  GestureDetector(
+                    onTap: () => _navigateToHome(context), // <--- LLAMADA A LA FUNCIÓN DE NAVEGACIÓN
+                    child: const Icon(
+                      Icons.home,
+                      color: Color(0xFFEF7532), // Color de acento
+                    ),
                   ),
-                  Icon(
+                  const Icon( // Este sigue siendo solo un ícono
                     Icons.search,
                     color: Color(0xFF676E79),
                   )

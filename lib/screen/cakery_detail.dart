@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cakery_shop_ui/widget/customAppBar.dart';
 import 'package:flutter_cakery_shop_ui/widget/navbar_widget.dart';
 import 'package:flutter_launch/flutter_launch.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,37 +20,10 @@ class CakeryDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Color(0xFF545D68),
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        title: Text(
-          'Pesan',
-          style: TextStyle(
-            fontFamily: 'Varela',
-            fontSize: 24.0.sp,
-            color: const Color(0xFF545D68),
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_none,
-              color: Color(0xFF545D68),
-            ),
-            onPressed: () {},
-          ),
-        ],
-      ),
+      appBar: const CustomAppBar(
+  title: 'Pesan',
+),
+
       body: ListView(
         children: [
           SizedBox(height: 16.0.h),
@@ -136,7 +110,7 @@ class CakeryDetail extends StatelessWidget {
                 child: InkWell(
                   onTap: () async {
                     await FlutterLaunch.launchWhatsapp(
-                      phone: '6285640899224',
+                      phone: '6391336449',
                       message:
                           'Hi Bahri Cakery,Saya mau order $cookiename untuk hari ini, apa bisa diantar kerumah?',
                     );
