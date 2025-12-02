@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cakery_shop_ui/screen/home_screen.dart';
+import 'package:flutter_cakery_shop_ui/screen/search_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 // Importamos la pantalla de destino
 
@@ -12,7 +13,7 @@ class NavbarWidget extends StatelessWidget {
     // Esto te permite volver a la pantalla anterior con el botón 'atrás'.
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(builder: (context) => const HomeMain()),
     );
   }
 
@@ -43,17 +44,27 @@ class NavbarWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   // --- ELEMENTO CLAVE: Usamos GestureDetector o InkWell para el ícono de la casa ---
-                  GestureDetector(
-                    onTap: () => _navigateToHome(context), // <--- LLAMADA A LA FUNCIÓN DE NAVEGACIÓN
-                    child: const Icon(
+                  IconButton(
+                    onPressed: () => _navigateToHome(context),
+                    icon: const Icon(
                       Icons.home,
-                      color: Color(0xFFEF7532), // Color de acento
+                      color: Color(0xFFEF7532),
                     ),
                   ),
-                  const Icon( // Este sigue siendo solo un ícono
-                    Icons.search,
-                    color: Color(0xFF676E79),
-                  )
+
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SearchScreen(title: '',)),
+                      );
+                    },
+                    child: const Icon(
+                      Icons.search,
+                      color: Color(0xFF676E79),
+                    ),
+                  ),
                 ],
               ),
             ),
