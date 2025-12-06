@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cakery_shop_ui/screen/cakery_page.dart';
-import 'package:flutter_cakery_shop_ui/widget/navbar_widget.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Home extends StatefulWidget {
@@ -97,9 +95,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             child: TabBarView(
               controller: _tabController,
               children: const [
-                CakeryPage(),
-                CakeryPage(),
-                CakeryPage(),
+             
               ],
             ),
           )
@@ -111,7 +107,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         backgroundColor: const Color(0xFFF17532),
         child: const Icon(Icons.fastfood),
       ),
-      bottomNavigationBar: const NavbarWidget(),
+      //bottomNavigationBar: const NavbarWidget(),
     );
   }
 }
