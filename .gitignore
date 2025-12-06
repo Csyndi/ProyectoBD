@@ -1,47 +1,178 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-migrate_working_dir/
+# =================================
+# FLUTTER/DART
+# =================================
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Archivos de configuración de Dart/Flutter
 .dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/
+.pubignore
+
+# Directorio de construcción
 /build/
+**/build/
 
-# Web related
+# Flutter específico
+.flutter-plugins
+.flutter-plugins-dependencies
+**/Flutter.podspec
+**/Flutter/Generated.xcconfig
+**/Flutter/ephemeral/
+**/Flutter/app.flx
+**/Flutter/app.zip
+**/Flutter/flutter_assets/
+**/Flutter/flutter_export_environment.sh
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# Archivos generados
+**/generated_plugin_registrant.dart
+**/*.g.dart
+**/*.freezed.dart
+
+# iOS
+ios/Flutter/.last_build_id
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/Dart.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_assets/
+ios/Flutter/flutter_export_environment.sh
+
+# Android
+android/.gradle/
+android/**/build/
+android/**/.gradle/
+android/**/local.properties
+android/**/GeneratedPluginRegistrant.java
+
+# Web
 lib/generated_plugin_registrant.dart
+/web/
 
-# Symbolication related
-app.*.symbols
+# Coverage
+coverage/
 
-# Obfuscation related
-app.*.map.json
+# Archivos de símbolos
+*.symbols
+*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# =================================
+# .NET C#
+# =================================
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio
+.vs/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Archivos de usuario específicos
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.opensdf
+*.sdf
+
+# Archivos de proyecto
+*.pidb
+*.db
+
+# Archivos de resultados de pruebas
+TestResults/
+[Tt]est[Rr]esult*
+[Bb]uild[Ll]og.*
+
+# Archivos de paquetes NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nupkg
+**/packages/*
+**/node_modules/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# Tye
+.tye/
+
+# Backup & report files
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.bak
+
+# JetBrains
+*.sln.ide
+
+# =================================
+# MISCELÁNEO
+# =================================
+
+# Sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+[Tt]humbs.db
+*.log
+
+# Editor/IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.history/
+.atom/
+.sublime-*
+*.swp
+*~
+
+# Version Control
+.svn/
+.metadata/
+
+# Entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs y temporales
+*.log
+*.tmp
+*.temp
+
+# Migraciones temporales
+migrate_working_dir/
+
+# Archivos de sistema operativo
+*.pid
+*.seed
+*.pid.lock

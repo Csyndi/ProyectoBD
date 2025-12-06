@@ -1,0 +1,17 @@
+# Rider
+*.sln.ide
+
+# Azure Functions
+func.yaml
+
+# Azure Stream Analytics
+*.asaql
+
+# MSSQL
+*.mdf
+*.ldf
+
+# Business Intelligence projects
+*.rdl.data
+*.bim.layout
+*.bim_*.settings
