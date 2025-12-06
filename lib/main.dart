@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cakery_shop_ui/home.dart';
+import 'package:flutter_cakery_shop_ui/screen/home_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() {
@@ -18,11 +19,11 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Flutter Demo',
+          title: 'Tiendita',
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: const Home(),
+          home: HomeScreen(),
         );
       },
     );
