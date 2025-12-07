@@ -180,7 +180,7 @@ class HomeScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: FloatingActionButton(
         heroTag: "btnAddStore",
-        backgroundColor: Colors.green,
+        backgroundColor: const Color.fromARGB(255, 13, 233, 196),
         child: const Icon(Icons.add_business, color: Colors.white),
         onPressed: () {
           Navigator.push(
@@ -194,7 +194,7 @@ class HomeScreen extends StatelessWidget {
     // --- BOTÓN: CARRITO ---
     FloatingActionButton(
       heroTag: "btnCart",
-      backgroundColor: Colors.deepOrange,
+      backgroundColor: const Color.fromARGB(255, 255, 0, 98),
       child: const Icon(Icons.shopping_cart, color: Colors.white),
       onPressed: () {
         Navigator.push(

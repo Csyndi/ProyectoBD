@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cakery_shop_ui/screen/utils/shared__pref.dart';
 
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -18,9 +17,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkAuth() async {
     await Future.delayed(const Duration(seconds: 2));
-    
+
     final token = await SharedPrefs.getToken();
-    
+
     if (mounted) {
       Navigator.pushReplacementNamed(
         context,
@@ -36,8 +35,12 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Tu logo
-            FlutterLogo(size: 100),
+            // Tu imagen desde assets
+            Image.asset(
+              'assets/carrito.png', // Ruta de tu imagen
+              height: 100,
+              width: 100,
+            ),
             const SizedBox(height: 20),
             const CircularProgressIndicator(),
           ],

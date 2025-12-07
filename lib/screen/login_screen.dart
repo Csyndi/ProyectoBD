@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cakery_shop_ui/screen/home_screen.dart';
 import 'services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -23,9 +24,10 @@ class _LoginScreenState extends State<LoginScreen>
   // ===== Imagenes de fondo animadas =====
   final List<String> bgImages = [
     "https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg",
-    "https://images.pexels.com/photos/4481326/pexels-photo-4481326.jpeg",
+    "https://images.pexels.com/photos/2817452/pexels-photo-2817452.jpeg",
     "https://images.pexels.com/photos/533325/pexels-photo-533325.jpeg",
-   
+    "https://images.pexels.com/photos/135620/pexels-photo-135620.jpeg",
+    "https://images.pexels.com/photos/1833586/pexels-photo-1833586.jpeg",
   ];
 
   int currentImageIndex = 0;
@@ -47,37 +49,104 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void dispose() {
     timer.cancel();
+    emailCtrl.dispose();
+    passCtrl.dispose();
     super.dispose();
   }
 
   // ============= LOGIN =============
   Future<void> _login() async {
+    // Validación básica
     if (emailCtrl.text.isEmpty || passCtrl.text.isEmpty) {
       setState(() => errorMessage = 'Por favor, completa todos los campos');
       return;
     }
+
+    // Validación de formato de email simple
+    //if (!emailCtrl.text.contains('@')) {
+    //  setState(() => errorMessage = 'Por favor, ingresa un email válido');
+    ////  return;
+    //}
 
     setState(() {
       isLoading = true;
       errorMessage = '';
     });
 
-    final result = await authService.login(emailCtrl.text, passCtrl.text);
+    // Llamar al servicio de autenticación
+    final result = await authService.login(
+      emailCtrl.text.trim(),
+      passCtrl.text.trim(),
+    );
 
     setState(() => isLoading = false);
 
+    print('Login result: $result'); // Debug
+
     if (result['success'] == true) {
-      _saveToken(result['data']['token']);
-      Navigator.pushReplacementNamed(context, '/home');
+      // Login exitoso
+      final userData = result['data'];
+      print('Usuario autenticado: $userData'); // Debug
+
+      // Mostrar mensaje de éxito
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('¡Bienvenido ${userData['nombre'] ?? ''}!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navegar a la pantalla principal
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
     } else {
+      // Mostrar error
       setState(() {
-        errorMessage = result['message'] ?? 'Error desconocido';
+        errorMessage = result['message'] ?? 'Error al iniciar sesión';
       });
+
+      // Mostrar snackbar con error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  void _saveToken(String token) {
-    print('Token guardado: $token');
+  // ============= PRUEBA DE CONEXIÓN =============
+  Future<void> _testConnection() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    try {
+      // Intentar hacer login con credenciales de prueba
+      print('Probando conexión con la API...');
+
+      // Puedes cambiar estos valores por unos que existan en tu base de datos
+      final testEmail = "test@example.com";
+      final testPassword = "test123";
+
+      final result = await authService.login(testEmail, testPassword);
+
+      setState(() {
+        isLoading = false;
+        errorMessage =
+            'Resultado prueba: ${result['success']} - ${result['message']}';
+      });
+
+      print('Resultado prueba: $result');
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Error de conexión: $e';
+      });
+    }
   }
 
   @override
@@ -142,23 +211,50 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                     child: Column(
                       children: [
+                        // Botón de prueba (solo para desarrollo)
+                        if (errorMessage.contains('prueba') ||
+                            errorMessage.contains('conexión'))
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: OutlinedButton(
+                              onPressed: _testConnection,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.yellow,
+                                side: const BorderSide(color: Colors.yellow),
+                              ),
+                              child: const Text('Probar Conexión API'),
+                            ),
+                          ),
+
                         if (errorMessage.isNotEmpty)
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.2),
+                              color: errorMessage.contains('¡Bienvenido')
+                                  ? Colors.green.withOpacity(0.2)
+                                  : Colors.red.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.error_outline,
-                                    color: Colors.red.shade300, size: 20),
+                                Icon(
+                                  errorMessage.contains('¡Bienvenido')
+                                      ? Icons.check_circle
+                                      : Icons.error_outline,
+                                  color: errorMessage.contains('¡Bienvenido')
+                                      ? Colors.green.shade300
+                                      : Colors.red.shade300,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     errorMessage,
                                     style: TextStyle(
-                                      color: Colors.red.shade100,
+                                      color:
+                                          errorMessage.contains('¡Bienvenido')
+                                              ? Colors.green.shade100
+                                              : Colors.red.shade100,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -173,6 +269,7 @@ class _LoginScreenState extends State<LoginScreen>
                           controller: emailCtrl,
                           label: "Correo electrónico",
                           icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
                         ),
 
                         const SizedBox(height: 20),
@@ -191,13 +288,15 @@ class _LoginScreenState extends State<LoginScreen>
                           width: double.infinity,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 15),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
+                              backgroundColor: isLoading
+                                  ? Colors.grey
+                                  : Colors.blueAccent.withOpacity(0.9),
+                              elevation: 5,
+                              shadowColor: Colors.blueAccent.withOpacity(0.5),
                             ),
                             onPressed: isLoading ? null : _login,
                             child: isLoading
@@ -205,34 +304,73 @@ class _LoginScreenState extends State<LoginScreen>
                                     color: Colors.white,
                                     strokeWidth: 2,
                                   )
-                                : const Text(
-                                    "Iniciar sesión",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                : const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.login, color: Colors.white),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        "Iniciar sesión",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                           ),
                         ),
 
                         const SizedBox(height: 20),
 
-                        // CREAR CUENTA — más visible
-                        InkWell(
-                          onTap: () {
+                        // OLVIDÉ MI CONTRASEÑA
+                        TextButton(
+                          onPressed: () {
                             HapticFeedback.lightImpact();
-                            Navigator.pushNamed(context, '/register');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Función en desarrollo'),
+                              ),
+                            );
                           },
                           child: Text(
-                            "Crear cuenta",
+                            "¿Olvidaste tu contraseña?",
                             style: TextStyle(
-                              color: Color(0xFFFF66AA),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 14,
                             ),
                           ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // CREAR CUENTA
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "¿No tienes cuenta? ",
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.pushNamed(context, '/register');
+                              },
+                              child: Text(
+                                "Regístrate",
+                                style: TextStyle(
+                                  color: const Color(0xFFFF66AA),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -241,12 +379,24 @@ class _LoginScreenState extends State<LoginScreen>
                   const SizedBox(height: 40),
 
                   // CRÉDITOS
-                  Text(
-                    "Por: Cindy Saenz y Diego Rubio",
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 13,
-                    ),
+                  Column(
+                    children: [
+                      Text(
+                        "Por: Cindy Saenz y Diego Rubio",
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        "API: http://localhost:7084",
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.6),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -263,34 +413,65 @@ class _LoginScreenState extends State<LoginScreen>
     required String label,
     required IconData icon,
     bool isPassword = false,
+    TextInputType keyboardType = TextInputType.text,
   }) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword && !isPasswordVisible,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.12),
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
-        prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.9)),
-        suffixIcon: isPassword
-            ? IconButton(
-                icon: Icon(
-                  isPasswordVisible
-                      ? Icons.visibility
-                      : Icons.visibility_off,
-                  color: Colors.white.withOpacity(0.7),
-                ),
-                onPressed: () {
-                  setState(() {
-                    isPasswordVisible = !isPasswordVisible;
-                  });
-                },
-              )
-            : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: isPassword && !isPasswordVisible,
+        keyboardType: keyboardType,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.12),
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
+          prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.9)),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isPasswordVisible = !isPasswordVisible;
+                    });
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(
+              color: Colors.white.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(
+              color: Colors.blueAccent,
+              width: 2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: 20,
+          ),
         ),
       ),
     );
