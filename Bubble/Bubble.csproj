@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="vercel.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DeepSeek.Sdk" Version="1.0.5" />
     <PackageReference Include="FluentAssertions" Version="8.2.0" />
     <PackageReference Include="LangChain.Providers.DeepSeek" Version="0.17.0" />
@@ -34,6 +38,10 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="Properties\PublishProfiles\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="vercel.json" />
   </ItemGroup>
 
 </Project>

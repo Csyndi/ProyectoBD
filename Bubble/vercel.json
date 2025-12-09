@@ -1,0 +1,14 @@
+{
+    "builds": [
+        {
+            "src": "api/*.cs",
+            "use": "@vercel/dotnet"
+        }
+    ],
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/api"
+        }
+    ]
+}
