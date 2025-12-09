@@ -1,10 +1,10 @@
-using System.Text;
-using System.Text.Json.Serialization;
+using Bubble.Data;
 using Bubble.Models;
-using BubbleI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +14,7 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
 // Configure Swagger/OpenAPI
@@ -27,12 +28,8 @@ if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 }
 
-// Cambia esta línea para usar SQL Server
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        connectionString,
-        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()
-    ));
+builder.Services.AddDbContext<BubbleDbContext>(options =>
+    options.UseNpgsql(connectionString));
 
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "MiClaveSecretaSuperSeguraDe64CaracteresParaJWT123456";
@@ -91,7 +88,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        var dbContext = services.GetRequiredService<BubbleDbContext>();
         dbContext.Database.Migrate();
         await CrearUsuarioAdmin(dbContext); // Llama al método
     }
@@ -105,7 +102,7 @@ using (var scope = app.Services.CreateScope())
 app.Run();
 
 // MÉTODO PARA CREAR USUARIO ADMIN - PONLO AQUÍ
-async Task CrearUsuarioAdmin(ApplicationDbContext context)
+async Task CrearUsuarioAdmin(BubbleDbContext context)
 {
     if (!await context.Usuarios.AnyAsync())
     {

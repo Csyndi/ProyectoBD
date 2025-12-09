@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cakery_shop_ui/models/producto.dart';
 
+// En product_detail_screen.dart
 class ProductDetailScreen extends StatelessWidget {
-  final Map<String, dynamic> product;
+  final Producto product; // Cambiar de Map<String, dynamic> a Producto
 
   const ProductDetailScreen({
     super.key,
@@ -10,105 +12,42 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String name = product["name"] ?? "Producto";
-    final double price = (product["price"] ?? 0).toDouble();
-    final String description = product["description"] ?? "Sin descripción";
-    final String image = product["image"] ?? "";
-
+    // Usar product.nombre, product.precio, etc.
     return Scaffold(
       appBar: AppBar(
-        title: Text(name),
+        title: Text(product.nombre),
       ),
-      body: SingleChildScrollView(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // IMAGEN
-            Container(
-              height: 250,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+            if (product.imagenUrl.isNotEmpty)
+              Image.network(
+                product.imagenUrl,
+                height: 200,
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
-              child: image.isEmpty
-                  ? const Icon(Icons.image, size: 80, color: Colors.grey)
-                  : Image.network(
-                      image,
-                      fit: BoxFit.cover,
-                    ),
+            const SizedBox(height: 16),
+            Text(
+              product.nombre,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-
-            const SizedBox(height: 20),
-
-            // INFO
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                        fontSize: 26, fontWeight: FontWeight.bold),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Text(
-                    "\$${price.toStringAsFixed(2)}",
-                    style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  const Text(
-                    "Descripción",
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    description,
-                    style: const TextStyle(fontSize: 15),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // BOTÓN AGREGAR AL CARRITO
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("$name agregado al carrito"),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        "Agregar al carrito",
-                        style: TextStyle(
-                            fontSize: 18, color: Colors.white),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-                ],
+            Text(
+              '\$${product.precio.toStringAsFixed(2)}',
+              style: TextStyle(fontSize: 20, color: Colors.green),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              product.descripcion,
+              style: TextStyle(fontSize: 16),
+            ),
+            if (product.categoriaProducto.isNotEmpty)
+              Text(
+                'Categoría: ${product.categoriaProducto}',
+                style: TextStyle(color: Colors.grey),
               ),
-            )
           ],
         ),
       ),

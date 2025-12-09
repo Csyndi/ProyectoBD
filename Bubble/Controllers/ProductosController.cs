@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Bubble.Data;
+using Bubble.Models;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bubble.Models;
-using BubbleI.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace BubbleI.Controllers
+namespace Bubble.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class ProductosController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly BubbleDbContext _context;
 
-        public ProductosController(ApplicationDbContext context)
+        public ProductosController(BubbleDbContext context)
         {
             _context = context;
         }
@@ -23,20 +23,14 @@ namespace BubbleI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
         {
-            return await _context.Productos
-                .Include(p => p.Tienda)
-                .Include(p => p.CategoriaProducto)
-                .ToListAsync();
+            return await _context.Productos.ToListAsync();
         }
 
         // GET: api/Productos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Producto>> GetProducto(int id)
         {
-            var producto = await _context.Productos
-                .Include(p => p.Tienda)
-                .Include(p => p.CategoriaProducto)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var producto = await _context.Productos.FindAsync(id);
 
             if (producto == null)
             {
@@ -52,18 +46,17 @@ namespace BubbleI.Controllers
         {
             return await _context.Productos
                 .Where(p => p.TiendaId == tiendaId)
-                .Include(p => p.CategoriaProducto)
                 .ToListAsync();
         }
 
-        // GET: api/Productos/categoria/5
-        [HttpGet("categoria/{categoriaId}")]
-        public async Task<ActionResult<IEnumerable<Producto>>> GetProductosPorCategoria(int categoriaId)
+        // POST: api/Productos
+        [HttpPost]
+        public async Task<ActionResult<Producto>> PostProducto(Producto producto)
         {
-            return await _context.Productos
-                .Where(p => p.CategoriaProductoId == categoriaId)
-                .Include(p => p.Tienda)
-                .ToListAsync();
+            _context.Productos.Add(producto);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetProducto", new { id = producto.Id }, producto);
         }
 
         // PUT: api/Productos/5
@@ -94,16 +87,6 @@ namespace BubbleI.Controllers
             }
 
             return NoContent();
-        }
-
-        // POST: api/Productos
-        [HttpPost]
-        public async Task<ActionResult<Producto>> PostProducto(Producto producto)
-        {
-            _context.Productos.Add(producto);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetProducto", new { id = producto.Id }, producto);
         }
 
         // DELETE: api/Productos/5

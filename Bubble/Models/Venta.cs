@@ -1,20 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
+﻿// Models/Venta.cs
 namespace Bubble.Models
 {
     public class Venta
     {
         public int Id { get; set; }
-        public int UsuarioId { get; set; } // Propiedad agregada
-        public int TiendaId { get; set; }
-        public DateTime FechaVenta { get; set; } // Propiedad agregada
+        public int UsuarioId { get; set; }
+        public DateTime FechaVenta { get; set; } = DateTime.Now;
         public decimal Total { get; set; }
-        public string Estado { get; set; } // Propiedad agregada
-
-        // Propiedades de navegación
-        public Usuario Usuario { get; set; } // Propiedad agregada
-        public Tienda Tienda { get; set; }
-        public ICollection<DetalleVenta> DetalleVentas { get; set; }
+        public string Estado { get; set; } = "Pendiente";
+        public string Usuario { get; set; }
+        public string DetalleVentas { get; set; }
     }
 }

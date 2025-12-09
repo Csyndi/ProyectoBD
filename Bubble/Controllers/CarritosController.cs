@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Bubble.Data;
+using Bubble.Models;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bubble.Models;
-using BubbleI.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace BubbleI.Controllers
+namespace Bubble.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class CarritosController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly BubbleDbContext _context;
 
-        public CarritosController(ApplicationDbContext context)
+        public CarritosController(BubbleDbContext context)
         {
             _context = context;
         }
@@ -23,22 +23,14 @@ namespace BubbleI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Carrito>>> GetCarritos()
         {
-            return await _context.Carritos
-                .Include(c => c.Usuario)
-                .Include(c => c.CarritoDetalles)
-                .ThenInclude(cd => cd.Producto)
-                .ToListAsync();
+            return await _context.Carritos.ToListAsync();
         }
 
         // GET: api/Carritos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Carrito>> GetCarrito(int id)
         {
-            var carrito = await _context.Carritos
-                .Include(c => c.Usuario)
-                .Include(c => c.CarritoDetalles)
-                .ThenInclude(cd => cd.Producto)
-                .FirstOrDefaultAsync(c => c.Id == id);
+            var carrito = await _context.Carritos.FindAsync(id);
 
             if (carrito == null)
             {
@@ -50,20 +42,21 @@ namespace BubbleI.Controllers
 
         // GET: api/Carritos/usuario/5
         [HttpGet("usuario/{usuarioId}")]
-        public async Task<ActionResult<Carrito>> GetCarritoPorUsuario(int usuarioId)
+        public async Task<ActionResult<IEnumerable<Carrito>>> GetCarritosPorUsuario(int usuarioId)
         {
-            var carrito = await _context.Carritos
-                .Include(c => c.Usuario)
-                .Include(c => c.CarritoDetalles)
-                .ThenInclude(cd => cd.Producto)
-                .FirstOrDefaultAsync(c => c.UsuarioId == usuarioId);
+            return await _context.Carritos
+                .Where(c => c.UsuarioId == usuarioId)
+                .ToListAsync();
+        }
 
-            if (carrito == null)
-            {
-                return NotFound();
-            }
+        // POST: api/Carritos
+        [HttpPost]
+        public async Task<ActionResult<Carrito>> PostCarrito(Carrito carrito)
+        {
+            _context.Carritos.Add(carrito);
+            await _context.SaveChangesAsync();
 
-            return carrito;
+            return CreatedAtAction("GetCarrito", new { id = carrito.Id }, carrito);
         }
 
         // PUT: api/Carritos/5
@@ -96,16 +89,6 @@ namespace BubbleI.Controllers
             return NoContent();
         }
 
-        // POST: api/Carritos
-        [HttpPost]
-        public async Task<ActionResult<Carrito>> PostCarrito(Carrito carrito)
-        {
-            _context.Carritos.Add(carrito);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCarrito", new { id = carrito.Id }, carrito);
-        }
-
         // DELETE: api/Carritos/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCarrito(int id)
@@ -117,6 +100,25 @@ namespace BubbleI.Controllers
             }
 
             _context.Carritos.Remove(carrito);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // DELETE: api/Carritos/usuario/5
+        [HttpDelete("usuario/{usuarioId}")]
+        public async Task<IActionResult> DeleteCarritosPorUsuario(int usuarioId)
+        {
+            var carritos = await _context.Carritos
+                .Where(c => c.UsuarioId == usuarioId)
+                .ToListAsync();
+
+            if (!carritos.Any())
+            {
+                return NotFound();
+            }
+
+            _context.Carritos.RemoveRange(carritos);
             await _context.SaveChangesAsync();
 
             return NoContent();

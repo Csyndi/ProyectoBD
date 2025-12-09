@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Bubble.Data;
+using Bubble.Models;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bubble.Models;
-using BubbleI.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace BubbleI.Controllers
+namespace Bubble.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class TiendasController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly BubbleDbContext _context;
 
-        public TiendasController(ApplicationDbContext context)
+        public TiendasController(BubbleDbContext context)
         {
             _context = context;
         }
@@ -23,20 +23,14 @@ namespace BubbleI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Tienda>>> GetTiendas()
         {
-            return await _context.Tiendas
-                .Include(t => t.Usuario)
-                .Include(t => t.Categoria)
-                .ToListAsync();
+            return await _context.Tiendas.ToListAsync();
         }
 
         // GET: api/Tiendas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Tienda>> GetTienda(int id)
         {
-            var tienda = await _context.Tiendas
-                .Include(t => t.Usuario)
-                .Include(t => t.Categoria)
-                .FirstOrDefaultAsync(t => t.Id == id);
+            var tienda = await _context.Tiendas.FindAsync(id);
 
             if (tienda == null)
             {
@@ -52,8 +46,17 @@ namespace BubbleI.Controllers
         {
             return await _context.Tiendas
                 .Where(t => t.UsuarioId == usuarioId)
-                .Include(t => t.Categoria)
                 .ToListAsync();
+        }
+
+        // POST: api/Tiendas
+        [HttpPost]
+        public async Task<ActionResult<Tienda>> PostTienda(Tienda tienda)
+        {
+            _context.Tiendas.Add(tienda);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetTienda", new { id = tienda.Id }, tienda);
         }
 
         // PUT: api/Tiendas/5
@@ -84,16 +87,6 @@ namespace BubbleI.Controllers
             }
 
             return NoContent();
-        }
-
-        // POST: api/Tiendas
-        [HttpPost]
-        public async Task<ActionResult<Tienda>> PostTienda(Tienda tienda)
-        {
-            _context.Tiendas.Add(tienda);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetTienda", new { id = tienda.Id }, tienda);
         }
 
         // DELETE: api/Tiendas/5

@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Bubble.Data;
+using Bubble.Models;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bubble.Models;
-using BubbleI.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace BubbleI.Controllers
+namespace Bubble.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly BubbleDbContext _context;
 
-        public UsuariosController(ApplicationDbContext context)
+        public UsuariosController(BubbleDbContext context)
         {
             _context = context;
         }
@@ -38,6 +38,16 @@ namespace BubbleI.Controllers
             }
 
             return usuario;
+        }
+
+        // POST: api/Usuarios
+        [HttpPost]
+        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
+        {
+            _context.Usuarios.Add(usuario);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetUsuario", new { id = usuario.Id }, usuario);
         }
 
         // PUT: api/Usuarios/5
@@ -70,16 +80,6 @@ namespace BubbleI.Controllers
             return NoContent();
         }
 
-        // POST: api/Usuarios
-        [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
-        {
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUsuario", new { id = usuario.Id }, usuario);
-        }
-
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id)
@@ -96,30 +96,9 @@ namespace BubbleI.Controllers
             return NoContent();
         }
 
-        // GET: api/Usuarios/login
-        [HttpPost("login")]
-        public async Task<ActionResult<Usuario>> Login([FromBody] LoginRequest request)
-        {
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == request.Email && u.Contrasena == request.Contrasena);
-
-            if (usuario == null)
-            {
-                return Unauthorized();
-            }
-
-            return Ok(usuario);
-        }
-
         private bool UsuarioExists(int id)
         {
             return _context.Usuarios.Any(e => e.Id == id);
         }
-    }
-
-    public class LoginRequest
-    {
-        public string Email { get; set; }
-        public string Contrasena { get; set; }
     }
 }
