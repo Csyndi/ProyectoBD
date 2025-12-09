@@ -1,182 +1,85 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_cakery_shop_ui/data/local_product_db.dart';
 
 class AddProductScreen extends StatefulWidget {
-  const AddProductScreen({Key? key}) : super(key: key);
+  final int tiendaId;
+  final String tiendaNombre;
+
+  const AddProductScreen({
+    Key? key,
+    required this.tiendaId,
+    required this.tiendaNombre,
+  }) : super(key: key);
 
   @override
   State<AddProductScreen> createState() => _AddProductScreenState();
 }
 
-
 class _AddProductScreenState extends State<AddProductScreen> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
+  final TextEditingController imageController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
-
-  File? _image;
-  final picker = ImagePicker();
-
-  final nameCtrl = TextEditingController();
-  final priceCtrl = TextEditingController();
-  final descCtrl = TextEditingController();
-
-  // -------------------- SELECCIONAR IMAGEN --------------------
-  Future<void> _selectImage() async {
-    final XFile? picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 70,
-    );
-
-    if (picked != null) {
-      setState(() => _image = File(picked.path));
-    }
-  }
-
-  // -------------------- GUARDAR PRODUCTO --------------------
-  void _saveProduct() {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (_image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Selecciona una imagen"),
-          backgroundColor: Colors.deepOrange,
-        ),
-      );
-      return;
-    }
-
-    final product = {
-      "name": nameCtrl.text.trim(),
-      "price": double.tryParse(priceCtrl.text.trim()) ?? 0,
-      "desc": descCtrl.text.trim(),
-      "image": _image!.path,
-    };
-
-    Navigator.pop(context, product);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F4F6),
       appBar: AppBar(
-        title: const Text("Agregar Producto", style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 2,
-        iconTheme: const IconThemeData(color: Colors.black),
+        title: Text("Agregar producto a ${widget.tiendaNombre}"),
       ),
-
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              // -------------------- IMAGEN --------------------
-              GestureDetector(
-                onTap: _selectImage,
-                child: Container(
-                  height: 180,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: _image == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.add_photo_alternate,
-                                size: 50, color: Colors.grey),
-                            SizedBox(height: 10),
-                            Text("Seleccionar Imagen"),
-                          ],
-                        )
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.file(
-                            _image!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                        ),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // -------------------- NOMBRE --------------------
               TextFormField(
-                controller: nameCtrl,
-                validator: (v) => v!.isEmpty ? "Ingresa un nombre" : null,
-                decoration: _fieldStyle("Nombre del producto"),
+                controller: nameController,
+                decoration: const InputDecoration(labelText: "Nombre"),
+                validator: (value) =>
+                    value!.isEmpty ? "El nombre es obligatorio" : null,
               ),
-
-              const SizedBox(height: 20),
-
-              // -------------------- PRECIO --------------------
               TextFormField(
-                controller: priceCtrl,
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: "Descripción"),
+              ),
+              TextFormField(
+                controller: priceController,
+                decoration: const InputDecoration(labelText: "Precio"),
                 keyboardType: TextInputType.number,
-                validator: (v) => v!.isEmpty ? "Ingresa un precio" : null,
-                decoration: _fieldStyle("Precio"),
+                validator: (value) =>
+                    value!.isEmpty ? "Ingresa un precio" : null,
               ),
-
-              const SizedBox(height: 20),
-
-              // -------------------- DESCRIPCIÓN --------------------
               TextFormField(
-                controller: descCtrl,
-                maxLines: 4,
-                decoration: _fieldStyle("Descripción (opcional)"),
-              ),
-
-              const SizedBox(height: 40),
-
-              // -------------------- BOTÓN GUARDAR --------------------
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saveProduct,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepOrange,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: const Text(
-                    "Guardar Producto",
-                    style: TextStyle(fontSize: 16),
-                  ),
+                controller: imageController,
+                decoration: const InputDecoration(
+                  labelText: "URL de la imagen (opcional)",
                 ),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    LocalProductDB().addProducto(widget.tiendaId, {
+                      "id": DateTime.now().millisecondsSinceEpoch,
+                      "name": nameController.text,
+                      "description": descriptionController.text,
+                      "price": double.tryParse(priceController.text) ?? 0.0,
+                      "image": imageController.text.isEmpty
+                          ? "https://via.placeholder.com/60"
+                          : imageController.text,
+                    });
+
+                    Navigator.pop(context, true);
+                  }
+                },
+                child: const Text("Guardar Producto"),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // -------------------- DECORACIÓN DE CAMPOS --------------------
-  InputDecoration _fieldStyle(String label) {
-    return InputDecoration(
-      labelText: label,
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
       ),
     );
   }

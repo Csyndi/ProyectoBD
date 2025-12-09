@@ -1,140 +1,182 @@
 import 'package:flutter/material.dart';
-import 'add_product_screen.dart';
-import 'product_detail_screen.dart';
+import 'package:flutter_cakery_shop_ui/data/local_product_db.dart';
+import 'package:flutter_cakery_shop_ui/screen/add_product_screen.dart';
+import 'package:flutter_cakery_shop_ui/screen/cart_manager.dart';
+import 'edit_product_screen.dart';
 
 class StoreDetailScreen extends StatefulWidget {
+  final int tiendaId;
+  final String tiendaNombre;
   final Map<String, dynamic> store;
 
   const StoreDetailScreen({
-    super.key,
+    Key? key,
+    required this.tiendaId,
+    required this.tiendaNombre,
     required this.store,
-  });
+  }) : super(key: key);
 
   @override
   State<StoreDetailScreen> createState() => _StoreDetailScreenState();
 }
 
 class _StoreDetailScreenState extends State<StoreDetailScreen> {
-  late List<Map<String, dynamic>> products;
+  List<Map<String, dynamic>> products = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _cargarProductos();
+  }
 
-    // Asegurar lista válida de productos
-    products = List<Map<String, dynamic>>.from(widget.store["products"] ?? []);
+  void _cargarProductos() {
+    setState(() {
+      isLoading = false;
+      products = LocalProductDB().getProductos(widget.tiendaId);
+    });
+  }
+
+  void _eliminarProducto(int index) {
+    final product = products[index];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Eliminar producto"),
+        content: Text('¿Eliminar "${product['name']}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
+          ),
+          TextButton(
+            onPressed: () {
+              LocalProductDB().removeProducto(widget.tiendaId, index);
+              setState(() {
+                products = LocalProductDB().getProductos(widget.tiendaId);
+              });
+              Navigator.pop(context);
+            },
+            child: const Text("Eliminar", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final store = widget.store;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(store["name"] ?? "Tienda"),
-        centerTitle: true,
+        title: Text(widget.tiendaNombre),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _cargarProductos,
+          ),
+        ],
       ),
-
+      body: _buildBody(),
       floatingActionButton: FloatingActionButton(
-  backgroundColor: Colors.deepPurple,
-  child: const Icon(Icons.add),
- onPressed: () async {
-  final newProduct = await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => const AddProductScreen(),
-    ),
-  );
-
-  if (newProduct != null) {
-    setState(() => products.add(newProduct));
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => AddProductScreen(
+                tiendaId: widget.tiendaId,
+                tiendaNombre: widget.tiendaNombre,
+              ),
+            ),
+          ).then((value) {
+            if (value == true) {
+              _cargarProductos();
+            }
+          });
+        },
+      ),
+    );
   }
-},
 
-),
+  Widget _buildBody() {
+    if (isLoading) return const Center(child: CircularProgressIndicator());
 
+    if (products.isEmpty) {
+      return const Center(
+        child: Text(
+          "No hay productos en esta tienda",
+          style: TextStyle(fontSize: 18, color: Colors.grey),
+        ),
+      );
+    }
 
-      body: ListView.builder(
-        itemCount: products.length,
-        padding: const EdgeInsets.all(16),
-        itemBuilder: (context, index) {
-          final p = products[index];
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        final product = products[index];
 
-          return GestureDetector(
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            leading: Image.network(
+              product['image'],
+              height: 60,
+              width: 60,
+              fit: BoxFit.cover,
+            ),
+            title: Text(product['name']),
+            subtitle: Text(product['description'] ?? ''),
+
+            // 👉 ICONOS: agregar al carrito + borrar
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 🟩 AGREGAR AL CARRITO
+                IconButton(
+                  icon: const Icon(Icons.add_shopping_cart, color: Colors.green),
+                  onPressed: () {
+                    CartManager().addToCart(product);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content:
+                            Text("${product['name']} agregado al carrito"),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                ),
+
+                // 🗑 BORRAR
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _eliminarProducto(index),
+                ),
+              ],
+            ),
+
+            // 👉 EDITAR
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ProductDetailScreen(product: p),
+                  builder: (_) => EditProductScreen(
+                    tiendaId: widget.tiendaId,
+                    index: index,
+                    product: product,
+                  ),
                 ),
-              );
+              ).then((value) {
+                if (value == true) {
+                  _cargarProductos();
+                }
+              });
             },
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  const BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  )
-                ],
-              ),
-              child: Row(
-                children: [
-                  // Imagen
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                      image: (p["image"] != null && p["image"] != "")
-                          ? DecorationImage(
-                              image: NetworkImage(p["image"]),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                    ),
-                    child: (p["image"] == null || p["image"] == "")
-                        ? const Icon(Icons.image, size: 40, color: Colors.white)
-                        : null,
-                  ),
-
-                  const SizedBox(width: 16),
-
-                  // Información
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          p["name"] ?? "Producto",
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "\$${p["price"]?.toStringAsFixed(2) ?? "0.00"}",
-                          style: const TextStyle(
-                              color: Colors.deepPurple,
-                              fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const Icon(Icons.arrow_forward_ios,
-                      size: 18, color: Colors.grey),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

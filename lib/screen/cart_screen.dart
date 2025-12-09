@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cakery_shop_ui/screen/cart_manager.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -8,19 +9,9 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  // 🛒 Carrito de ejemplo (puedes conectarlo a BD después)
-  List<Map<String, dynamic>> cartItems = [
-    {
-      "name": "Pastel Chocolate",
-      "price": 80.0,
-      "qty": 2,
-    },
-    {
-      "name": "Caja de Donas",
-      "price": 50.0,
-      "qty": 2,
-    }
-  ];
+
+  List<Map<String, dynamic>> get cartItems => CartManager().cartItems;
+
 
   // 🧮 Calcular total
   double get total {
@@ -77,7 +68,7 @@ class _CartScreenState extends State<CartScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("📍 MiniMarket Ltd.",
+                  const Text("📍 Tienda en línea",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   Text("Fecha: $date"),
                   const Divider(),
